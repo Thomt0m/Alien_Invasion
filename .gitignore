@@ -1,0 +1,16 @@
+# Alien Invasion GitIgnore
+
+
+# Directories
+**/__pycache__
+
+
+
+
+
+
+
+
+
+# Files
+*.pyc
