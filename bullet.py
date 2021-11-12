@@ -14,11 +14,11 @@ class Bullet(Sprite):
         """Create a new bullet object, at the entities current position"""
         super().__init__()
         self.screen = game.screen
-        self.settings = game.settings
+        self.settings = game.settings.bullet
 
         # Create the bullet
-        self.colour = self.settings.bullet_colour
-        self.rect = pygame.Rect(0, 0, self.settings.bullet_width, self.settings.bullet_height)
+        self.colour = self.settings.colour
+        self.rect = pygame.Rect(0, 0, self.settings.width, self.settings.height)
         self.rect.midtop = game.ship.rect.midtop
 
         # Store the bullet's vertical pos as float
@@ -35,7 +35,7 @@ class Bullet(Sprite):
         Gets called from pygame.sprite.group, group.update(), which tries to call a function named update() on each of its elements
         """
         # Update vertical position
-        self.y -= self.settings.bullet_speed
+        self.y -= self.settings.speed
         self.rect.y = self.y
 
 

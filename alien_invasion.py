@@ -2,11 +2,16 @@
 # Based on the project 'Alien Invasion' from the book 'Python Crash Course, 2nd edition'
 
 
+
+
+
 # ---- External ----
 # System
 import sys
 # Pygame, set of modules for video games 
 import pygame
+
+
 
 # ---- Custom, home-made ----
 # General game-settings class
@@ -14,6 +19,11 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+
+
+
+
+
 
 
 
@@ -29,21 +39,17 @@ class AlienInvasion:
         self.settings = Settings()
 
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        self.settings.screen_width = self.screen.get_rect().width
-        self.settings.screen_height = self.screen.get_rect().height
+        self.settings.screen.width = self.screen.get_rect().width
+        self.settings.screen.height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
 
         # Create the player ship
-        self.ship = Ship(self, self.settings.screen_height * self.settings.ship_image_scale)
+        self.ship = Ship(self, self.settings.screen.height * self.settings.ship.image_scale)
         # Create a group for the bullets fired by the player
         self.bullets = pygame.sprite.Group()
         # Create a group for the aliens
         self.aliens = pygame.sprite.Group()
         self._create_alien_fleet()
-
-
-
-
 
 
 
@@ -147,6 +153,7 @@ class AlienInvasion:
         
         self._update_ship()
         self._update_bullets()
+        self._update_aliens()
 
 
 
@@ -162,6 +169,9 @@ class AlienInvasion:
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
 
+    def _update_aliens(self):
+        """Update the fleet of aliens"""
+        self.aliens.update()
 
 
 
@@ -172,8 +182,8 @@ class AlienInvasion:
 
         # Redraw the screen, and all its attributes/elements
         # !ORDER MATTERS! Everything gets drawn in order, so things further down will be drawn on top of their predecesors
-        self.screen.fill(self.settings.background_colour)
-        self.ship.blitme()
+        self.screen.fill(self.settings.screen.background_colour)
+        self.ship.blit_me()
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
@@ -192,39 +202,41 @@ class AlienInvasion:
 
     def _fire_bullet(self) -> None:
         """Create a new bullet, add it to 'bullets' group"""
-        if (self.settings.bullet_limit_number and len(self.bullets) >= self.settings.bullet_max_number_allowed) == False:
+        if (self.settings.bullet.limit_number and len(self.bullets) >= self.settings.bullet.max_number_allowed) == False:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
     # TODO remove, old, replaced by _create_fleet
     def _add_alien_to_fleet(self) -> None:
         """Add an alien to the alien fleet"""
-        alien = Alien(self, self.settings.screen_height * self.settings.ship_image_scale)
+        alien = Alien(self, self.settings.screen.height * self.settings.alien.image_scale)
         self.aliens.add(alien)
 
-    def _create_alien_fleet(self, rows = 1):
+    def _create_alien_fleet(self, rows: int = 1, columns: int = 9999):
         """Create a fleet of alien ships"""
         # Create an alien ship and find the number of ships that will fit in a row, and a column, depending on screen width
-        alien = Alien(self, self.settings.screen_height * self.settings.ship_image_scale)
-        edge_margin_hor = self.settings.alien_edge_margin_hor * alien.rect.width
-        # Floor-division, aka integer division, might return a float although the value should always be a whole number ('for alien_num in range(max_aliens_in_row)' starts protesting without casting to int)
-        max_aliens_in_row = int((self.settings.screen_width - 2 * edge_margin_hor) // (self.settings.alien_fleet_spacing * alien.rect.width))
-        edge_margin_vert = self.settings.alien_edge_margin_vert * alien.rect.height
-        max_aliens_in_column = int((self.settings.screen_height / 2 - edge_margin_vert) // (2 * alien.rect.height))
-
-        # Clamp rows to the maximum number of columns that will fit on screen
+        alien = Alien(self, self.settings.screen.height * self.settings.alien.image_scale)
+        edge_margin_hor = self.settings.alien.edge_margin_hor * self.settings.screen.width
+        # Floor-division, aka integer division, might return a float although the value should always be a whole number, ie an integer. But 'for alien_num in range(max_aliens_in_row)' starts protesting when recieving a float, so we cast to int
+        max_aliens_in_row = int((self.settings.screen.width - 2 * edge_margin_hor) // (self.settings.alien.fleet_spacing * alien.rect.width))
+        edge_margin_vert = self.settings.alien.edge_margin_vert * self.settings.screen.width
+        # Maximum vertical size of the fleet is limited to the height of the screen, minus 2 * the height of the players ship
+        max_aliens_in_column = int((self.settings.screen.height - edge_margin_vert - self.ship.rect.height * 2) // (2 * alien.rect.height))
+                
+        # Clamp rows to the maximum number of columns that will fit on screen (ie the max vertical length)
         rows = max(1, min(rows, max_aliens_in_column))
+        # Clamp columns to the maximum number of rows that will fit on screen (ie the max horizontal length)
+        columns = max(1, min(columns, max_aliens_in_row))
 
-        # Create the rows of aliens
-        i = 0
-        while i < rows:
-            for alien_num in range(max_aliens_in_row):
-                # Create an alien ship, set its location on screen, and place it in the aliens group
-                alien = Alien(self, self.settings.screen_height * self.settings.ship_image_scale)
-                alien.rect.x = edge_margin_hor + self.settings.alien_fleet_spacing * alien.rect.width * alien_num
-                alien.rect.y = edge_margin_vert + self.settings.alien_fleet_spacing * alien.rect.height * i
+        # Create the fleet of aliens, setting x and y for each alien
+        for alien_m in range(rows):
+            for alien_n in range(columns):
+                # Create an alien ship, set its screen location, and place it in the aliens group
+                alien = Alien(self, self.settings.screen.height * self.settings.alien.image_scale)
+                alien.set_initial_pos(
+                    edge_margin_hor + self.settings.alien.fleet_spacing * alien.rect.width * alien_n, 
+                    edge_margin_vert + self.settings.alien.fleet_spacing * alien.rect.height * alien_m)
                 self.aliens.add(alien)
-            i += 1
 
 
 

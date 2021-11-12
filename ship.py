@@ -10,7 +10,7 @@ class Ship:
 
         self.screen = game.screen
         self.screen_rect = game.screen.get_rect()
-        self.settings = game.settings
+        self.settings = game.settings.ship
 
         # Load the ship image and get its rectangle
         self.image = pygame.image.load("Assets/Spaceship01.png")
@@ -21,7 +21,7 @@ class Ship:
         self.rect.midbottom = self.screen_rect.midbottom
 
         # Horizontal movement, in pixels per frame
-        self.speed_x = self.settings.screen_width * self.settings.ship_speed_multiplier
+        self.speed_x = game.settings.screen.width * self.settings.speed_multiplier
         # Store the ships horizontal pos as a float (rect only stores int)
         self.x = float(self.rect.x)
 
@@ -38,7 +38,7 @@ class Ship:
 
 
 
-    def blitme(self) -> None:
+    def blit_me(self) -> None:
         """Draw the ship at its current location"""
         self.screen.blit(self.image, self.rect)
 
