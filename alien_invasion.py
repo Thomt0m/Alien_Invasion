@@ -8,16 +8,18 @@ import sys
 # Pygame, set of modules for video games 
 import pygame
 
-# ---- Custom ----
+# ---- Custom, home-made ----
 # General game-settings class
 from settings import Settings
 from ship import Ship
+from bullet import Bullet
 
 
 
 class AlienInvasion:
     """Base class, manages game assets and behaviour"""
     
+
 
     def __init__(self) -> None:
         """Initialise the game, and create its resources"""
@@ -31,11 +33,17 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
 
         # Create the player ship
-        self.ship = Ship(self, self.settings.screen_height / self.settings.ship_image_scale)
+        self.ship = Ship(self, self.settings.screen_height * self.settings.ship_image_scale)
+        # Create a group for the bullets fired by the player
+        self.bullets = pygame.sprite.Group()
 
 
         # Set background colour (TODO replace, with generated or image or something)
         self.bg_colour = (230, 230, 230)
+
+
+
+
 
 
 
@@ -74,7 +82,6 @@ class AlienInvasion:
                 case pygame.QUIT:
                     sys.exit()
 
-
                 # Key down events
                 case pygame.KEYDOWN:
                     self._handle_keydown_event(event)
@@ -107,6 +114,10 @@ class AlienInvasion:
             case pygame.K_a:
                 self.ship.moving_left = True
 
+            # Fire bullets
+            case pygame.K_SPACE:
+                self._fire_bullet()
+
     def _handle_keyup_event(self, event) -> None:
         """Handle the specified KeyUp event. Acts based on the key that triggered the event"""
         match event.key:
@@ -133,7 +144,24 @@ class AlienInvasion:
     def _update_elements(self) -> None:
         """Update elements of the game. Called constantly"""
         
+        self._update_ship()
+        self._update_bullets()
+
+
+
+    def _update_ship(self) -> None:
+        """Update the player ship"""
         self.ship.update_pos()
+
+    def _update_bullets(self) -> None:
+        """Update the bullets fired by player"""
+        self.bullets.update()
+        # loop over all bullets, delete those that are out-of-bounds (python expects the list of bullets to remain unchanged for the duration of the for-loop, so we make a copy of bullets that wont change for the loop to iterate through, and now we can safely make changes to bullets)
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+        # TODO remove, debug to verify bullets are being deleted
+        print(len(self.bullets))
 
 
 
@@ -147,9 +175,23 @@ class AlienInvasion:
         # !ORDER MATTERS! Everything gets drawn in order, so things further down will be drawn on top of their predecesors
         self.screen.fill(self.settings.background_colour)
         self.ship.blitme()
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
 
         # Make the newly drawn screen visible, ie update
         pygame.display.flip()
+
+
+
+
+
+
+
+
+    def _fire_bullet(self) -> None:
+        """Create a new bullet, add it to 'bullets' group"""
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
 
 
 
