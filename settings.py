@@ -12,7 +12,7 @@ class Settings:
         # ---- Screen ----
         self.screen_width = 1920
         self.screen_height = 1080
-        self.background_colour = (230, 230, 230)
+        self.background_colour = (40, 40, 40)
 
         
         # ---- Ship (player) entity ----
@@ -27,5 +27,14 @@ class Settings:
         self.bullet_speed = 8
         self.bullet_width = 3
         self.bullet_height = 15
-        self.bullet_colour = (60, 60, 60)
+        self.bullet_colour = (250, 250, 250)
+        self.bullet_limit_number = True
+        self.bullet_max_number_allowed = 3
+
+        # ---- Alien ----
+        # The space between the outer alien entity and the edge of the screen, expressed alien-ship-widths
+        self.alien_edge_margin_hor = 1.8
+        self.alien_edge_margin_vert = 0.5
+        # Spacing between alien ships in the fleet, expressed alien-ship-widths (actual space is minus one, since each ship takes up its own width)
+        self.alien_fleet_spacing = 1.6
 

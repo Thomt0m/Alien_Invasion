@@ -34,7 +34,6 @@ class Bullet(Sprite):
         Update the state of the bullet, eg position.
         Gets called from pygame.sprite.group, group.update(), which tries to call a function named update() on each of its elements
         """
-
         # Update vertical position
         self.y -= self.settings.bullet_speed
         self.rect.y = self.y

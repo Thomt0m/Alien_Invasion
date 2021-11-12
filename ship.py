@@ -1,7 +1,5 @@
 import pygame
 
-from pygame.transform import scale
-
 
 class Ship:
     """Player's ship, manages the ship"""
@@ -24,7 +22,7 @@ class Ship:
 
         # Horizontal movement, in pixels per frame
         self.speed_x = self.settings.screen_width * self.settings.ship_speed_multiplier
-        # Store the deciaml value of the ships horizontal pos (rect only stores int)
+        # Store the ships horizontal pos as a float (rect only stores int)
         self.x = float(self.rect.x)
 
         # Movement flags
