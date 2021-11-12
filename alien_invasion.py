@@ -25,13 +25,16 @@ class AlienInvasion:
         pygame.init()
         self.settings = Settings()
 
-        self.screen = pygame.display.set_mode((self.settings.screen_width, self.settings.screen_height))
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.settings.screen_width = self.screen.get_rect().width
+        self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
 
-        self.ship = Ship(self)
+        # Create the player ship
+        self.ship = Ship(self, self.settings.screen_height / self.settings.ship_image_scale)
 
 
-        # Set background colour (TODO replace with image or something)
+        # Set background colour (TODO replace, with generated or image or something)
         self.bg_colour = (230, 230, 230)
 
 
@@ -67,28 +70,60 @@ class AlienInvasion:
         for event in pygame.event.get():
             match event.type:
 
+                # Close window event, quit
                 case pygame.QUIT:
                     sys.exit()
 
+
+                # Key down events
                 case pygame.KEYDOWN:
-                    match event.key:
+                    self._handle_keydown_event(event)
 
-                        case pygame.K_RIGHT:
-                            # Move the player's ship to the right
-                            self.ship.moving_right = True
-                        case pygame.K_LEFT:
-                            # Move the player's ship to the left
-                            self.ship.moving_left = True
-
+                # Key up events
                 case pygame.KEYUP:
-                    match event.key:
+                    self._handle_keyup_event(event)
 
-                        case pygame.K_RIGHT:
-                            # Stop the player's ship moving to the right
-                            self.ship.moving_right = False
-                        case pygame.K_LEFT:
-                            # Stop the player's ship moving to the left
-                            self.ship.moving_left = False
+
+    def _handle_keydown_event(self, event) -> None:
+        """Handle the specified KeyDown event. Acts based on the key that triggered the event"""
+        match event.key:
+
+            # On escape, quit game (TODO determine if a pause menu should be on escape)
+            case pygame.K_ESCAPE:
+                sys.exit()
+            # On backspace, quit game
+            case pygame.K_BACKSPACE:
+                sys.exit()
+
+            # Move the player's ship to the right
+            case pygame.K_RIGHT:
+                self.ship.moving_right = True
+            case pygame.K_d:
+                self.ship.moving_right = True
+                
+            # Move the player's ship to the left
+            case pygame.K_LEFT:
+                self.ship.moving_left = True
+            case pygame.K_a:
+                self.ship.moving_left = True
+
+    def _handle_keyup_event(self, event) -> None:
+        """Handle the specified KeyUp event. Acts based on the key that triggered the event"""
+        match event.key:
+
+            # Stop the player's ship moving to the right
+            case pygame.K_RIGHT:
+                self.ship.moving_right = False
+            case pygame.K_d:
+                self.ship.moving_right = False
+
+            # Stop the player's ship moving to the left
+            case pygame.K_LEFT:
+                self.ship.moving_left = False
+            case pygame.K_a:
+                self.ship.moving_left = False
+
+
                             
 
 
