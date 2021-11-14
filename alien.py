@@ -40,3 +40,11 @@ class Alien(Sprite):
         """Update the alien ship, eg pos"""
         self.x += self.speed_x * self.settings.fleet_movement_direction
         self.rect.x = self.x
+
+
+
+
+    def is_at_hor_screen_edge(self) -> bool:
+        """Check if this alien is at or over the horizontal edge of the screen. Returns true is so"""
+        screen_rect = self.screen.get_rect()
+        return (self.rect.right >= (screen_rect.right - self.settings.edge_distance_hor) or self.rect.left <= self.settings.edge_distance_hor)

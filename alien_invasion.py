@@ -8,6 +8,7 @@
 # ---- External ----
 # System
 import sys
+from time import sleep
 # Pygame, set of modules for video games 
 import pygame
 
@@ -16,6 +17,7 @@ import pygame
 # ---- Custom, home-made ----
 # General game-settings class
 from settings import Settings
+from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -43,6 +45,8 @@ class AlienInvasion:
         self.settings.screen.height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
 
+        self.stats = GameStats(self)
+
         # Create the player ship
         self.ship = Ship(self, self.settings.screen.height * self.settings.ship.image_scale)
         # Create a group for the bullets fired by the player
@@ -52,8 +56,6 @@ class AlienInvasion:
         self._create_alien_fleet()
 
 
-
-
     def run_game(self) -> None:
         """Run the main game loop"""
 
@@ -61,9 +63,14 @@ class AlienInvasion:
         while True:
 
             self._check_events()
-            self._update_elements()
+            if self.stats.game_active:
+                self._update_elements()
             self._update_screen()
             
+
+
+
+
 
 
             
@@ -164,14 +171,34 @@ class AlienInvasion:
     def _update_bullets(self) -> None:
         """Update the bullets fired by player"""
         self.bullets.update()
-        # loop over all bullets, delete those that are out-of-bounds (python expects the list of bullets to remain unchanged for the duration of the for-loop, so we make a copy of bullets that wont change for the loop to iterate through, and now we can safely make changes to bullets)
+        # Loop over all bullets, delete those that are out-of-bounds (python expects the list of bullets to remain unchanged for the duration of the for-loop, so we make a copy of bullets that wont change for the loop to iterate through, and now we can safely make changes to bullets)
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+        self._check_aliens_hit_by_bullets()
+       
+
+    def _check_aliens_hit_by_bullets(self):
+        """Check if any aliens were hit by a bullet, and if so remove both from play"""
+        # Check for any bullets that have hit aliens, if so, destroy both
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        # If not aliens are left, delete any remaining bullets and create a new alien fleet
+        if not self.aliens:
+            self.bullets.empty()
+            self._create_alien_fleet()
 
     def _update_aliens(self):
         """Update the fleet of aliens"""
+        self._check_alien_fleet_edges()
         self.aliens.update()
+
+        # Check if any aliens have collided with the player ship, meaning this game is lost
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._player_lost()
+
+        # Check if any aliens have reached the bottom of the screen, meaning this game is lost
+        self._check_alien_fleet_bottom()
+
 
 
 
@@ -206,13 +233,8 @@ class AlienInvasion:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
-    # TODO remove, old, replaced by _create_fleet
-    def _add_alien_to_fleet(self) -> None:
-        """Add an alien to the alien fleet"""
-        alien = Alien(self, self.settings.screen.height * self.settings.alien.image_scale)
-        self.aliens.add(alien)
 
-    def _create_alien_fleet(self, rows: int = 1, columns: int = 9999):
+    def _create_alien_fleet(self, rows: int = 2, columns: int = 9999):
         """Create a fleet of alien ships"""
         # Create an alien ship and find the number of ships that will fit in a row, and a column, depending on screen width
         alien = Alien(self, self.settings.screen.height * self.settings.alien.image_scale)
@@ -228,6 +250,9 @@ class AlienInvasion:
         # Clamp columns to the maximum number of rows that will fit on screen (ie the max horizontal length)
         columns = max(1, min(columns, max_aliens_in_row))
 
+        # Store the current edge_margin_hor, decreased by a buffer
+        self.settings.alien.edge_distance_hor = edge_margin_hor / 3
+
         # Create the fleet of aliens, setting x and y for each alien
         for alien_m in range(rows):
             for alien_n in range(columns):
@@ -237,6 +262,50 @@ class AlienInvasion:
                     edge_margin_hor + self.settings.alien.fleet_spacing * alien.rect.width * alien_n, 
                     edge_margin_vert + self.settings.alien.fleet_spacing * alien.rect.height * alien_m)
                 self.aliens.add(alien)
+
+    
+    def _check_alien_fleet_edges(self):
+        """Check if the edge of the alien fleet is at/near the horizontal edge of the screen"""
+        for alien in self.aliens.sprites():
+            if alien.is_at_hor_screen_edge():
+                self._change_alien_fleet_direction()
+                break
+
+    def _check_alien_fleet_bottom(self):
+        """Check if a alien of the alien fleet has reached the bottom of the screen"""
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+                # End the game
+                self._player_lost()
+                break
+
+
+    def _change_alien_fleet_direction(self):
+        """Make the fleet move down, and change the direction of horizontal movement of the alien fleeet"""
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.alien.speed_ver_multiplier * self.settings.screen.height
+        self.settings.alien.fleet_movement_direction *= -1
+
+
+    def _player_lost(self):
+        """
+        This game has been lost, eg because the player ship is hit by an alien, or an alien has reached the bottom of the screen.
+        Decrement the players lives by one, and remove any residual aliens and bullets, then start a new round
+        """
+        # If the player has any lives left
+        if self.stats.ships_left > 0:
+            self.stats.ships_left -= 1
+            self.aliens.empty()
+            self.bullets.empty()
+            self._create_alien_fleet()
+            self.ship.center_ship()                
+            # Give the player time to recognise this round was lost
+            sleep(1.0)
+        # Else the game is over
+        else:
+            self.stats.game_active = False
+
 
 
 

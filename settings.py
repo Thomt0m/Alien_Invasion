@@ -30,6 +30,7 @@ class Settings:
             self.image_scale = 0.1
             # Multiplier of movement distance of ship, speed is determined relative to the width of the screen, speed is expressed as pixels per frame, comfortable values are around '0.001'
             self.speed_multiplier = 0.002
+            self.max_lives = 3
         
 
 
@@ -41,7 +42,7 @@ class Settings:
         def __init__(self) -> None:
             """Initialise bullet settings"""
             self.speed = 8
-            self.width = 3
+            self.width = 3000   # was 3
             self.height = 15
             self.colour = (250, 250, 250)
             self.limit_number = True
@@ -64,9 +65,12 @@ class Settings:
             self.fleet_spacing = 1.6
             # Multiplier of movement distance of alien ship, speed is determined relative to the width of the screen, speed is expressed as pixels per frame, comfortable values are around '0.0002'
             self.speed_hor_multiplier = 0.0002
-            self.speed_ver_multiplier = 0.002
+            # Vertical speed is done as a single step, instead of a continuous movement
+            self.speed_ver_multiplier = 0.2 # was 0.01
             # Movement direction of the alien fleet, 1 == moving to the right, -1 == moving to the left
             self.fleet_movement_direction = 1
+            # Actual distance in pixels from the edge of the screen
+            self.edge_distance_hor = 0.0
             
             
 
