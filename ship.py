@@ -19,9 +19,7 @@ class Ship:
 
         # Start the ship at the bottom center of the screen
         self.rect.midbottom = self.screen_rect.midbottom
-
-        # Horizontal movement, in pixels per frame
-        self.speed_x = game.settings.screen.width * self.settings.speed_multiplier
+        
         # Store the ships horizontal pos as a float (rect only stores int)
         self.x = float(self.rect.x)
 
@@ -47,9 +45,9 @@ class Ship:
     def update_pos(self) -> None:
         """Update the position, based on the movement flags"""
         if (self.moving_right and self.rect.right < self.screen_rect.right):
-            self.x += self.speed_x
+            self.x += self.settings.speed_x
         if (self.moving_left and self.rect.left > self.screen_rect.left):
-            self.x -= self.speed_x
+            self.x -= self.settings.speed_x
         self.rect.x = self.x
 
     def center_ship(self):

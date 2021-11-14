@@ -8,7 +8,7 @@ class GameStats:
         """Initialise statistics"""
         self.settings = game.settings
         self.reset_stats()
-        self.game_active = True
+        self.game_active = False
 
 
 
