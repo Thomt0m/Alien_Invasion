@@ -77,11 +77,13 @@ class Settings:
             self.speed_ver_multiplier = 0.01
             self.speed_y_base: float = screen_rect.height * self.speed_ver_multiplier
             self.speed_y: float = self.speed_y_base
-            print(f"Settings: alien.speed_y = {self.speed_y}")
             # Movement direction of the alien fleet, 1 == moving to the right, -1 == moving to the left
             self.fleet_movement_direction = 1
             # Actual distance in pixels from the edge of the screen
             self.edge_distance_hor = 0.0
+            # Number of points awarded for shooting an alien
+            self.points_base: int = 50
+            self.points: int = self.points_base
             
             
 
@@ -104,19 +106,19 @@ class Settings:
 
         # ---- General settings ----
         # Increase factor of game speed after each succesfull round
-        self.speed_scale = 1.1
+        self.difficulty_scale = 1.1
 
 
 
 
 
-    def increase_speed(self):
+    def increase_difficulty(self):
         """Increase the speed of the player ship, bullets and the alien fleet"""
-        self.ship.speed_x *= self.speed_scale
-        self.bullet.speed *= self.speed_scale
-        self.alien.speed_x *= self.speed_scale
-        self.alien.speed_y *= ((self.speed_scale - 1) / 4) + 1
-        print("Settings: speed increased")
+        self.ship.speed_x *= self.difficulty_scale
+        self.bullet.speed *= self.difficulty_scale
+        self.alien.speed_x *= self.difficulty_scale
+        self.alien.speed_y *= ((self.difficulty_scale - 1) / 4) + 1
+        self.alien.points = int((((self.difficulty_scale - 1) * 2) + 1) * self.alien.points)
 
     def reset_speed(self):
         """Reset the speed of the player ship, bullets and the alien fleet back to their initial values"""
@@ -124,6 +126,6 @@ class Settings:
         self.bullet.speed = self.bullet.speed_base
         self.alien.speed_x = self.alien.speed_x_base
         self.alien.speed_y = self.alien.speed_y_base
-        print("Settings: speed reset")
+        self.alien.points = self.alien.points_base
 
 
