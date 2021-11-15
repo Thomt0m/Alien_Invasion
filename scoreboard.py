@@ -1,6 +1,8 @@
 import pygame.font
 from pygame.sprite import Group
 
+from ship import Ship
+
 
 
 class Scoreboard:
@@ -51,12 +53,14 @@ class Scoreboard:
     
     def player_lives_to_image(self):
         """Turn the number of lives to player has left into a rendered image"""
-        # Render the image
-        self.lives_image = self.font.render("Lives: " + str(self.stats.ships_left), True, self.text_colour)
-        # Set its pos, bottom-left
-        self.lives_rect = self.lives_image.get_rect()
-        self.lives_rect.left = self.screen_rect.left + 20
-        self.lives_rect.bottom = self.screen_rect.bottom - 20
+        self.lives = Group()
+        for lives_number in range(self.stats.lives):
+            ship = Ship(self.game, self.settings.ship.image_scale / 3)
+            # Set its pos, bottom left
+            ship.rect.x = (20 + lives_number * ship.rect.width) + self.screen_rect.left
+            ship.rect.y = (self.screen_rect.bottom - 20) - ship.rect.height
+            self.lives.add(ship)
+
 
 
     def level_to_image(self):
@@ -66,15 +70,15 @@ class Scoreboard:
         # Set its pos, bottom right
         self.level_rect = self.level_image.get_rect()
         self.level_rect.right = self.screen_rect.right - 20
-        self.level_rect.bottom = self.lives_rect.bottom
+        self.level_rect.bottom = self.screen_rect.bottom - 20
 
 
 
 
 
     def show_score(self):
-        """Draw score to screen"""
+        """Draw game stats to screen"""
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.highscore_image, self.highscore_rect)
-        self.screen.blit(self.lives_image, self.lives_rect)
+        self.lives.draw(self.screen)
         self.screen.blit(self.level_image, self.level_rect)

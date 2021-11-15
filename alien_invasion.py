@@ -54,7 +54,7 @@ class AlienInvasion:
         self.scoreboard = Scoreboard(self)
 
         # Create the player ship
-        self.ship = Ship(self, self.settings.screen.height * self.settings.ship.image_scale)
+        self.ship = Ship(self, self.settings.ship.image_scale)
         # Create a group for the bullets fired by the player
         self.bullets = pygame.sprite.Group()
         # Create a group for the aliens
@@ -356,8 +356,8 @@ class AlienInvasion:
         Decrement the players lives by one, and remove any residual aliens and bullets, then start a new round
         """
         # If the player has any lives left
-        if self.stats.ships_left > 1:
-            self.stats.ships_left -= 1
+        if self.stats.lives > 1:
+            self.stats.lives -= 1
             self.new_game()
             # Give the player time to recognise this round was lost
             sleep(1.0)

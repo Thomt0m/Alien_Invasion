@@ -16,6 +16,7 @@ class Ship(Sprite):
 
         # Load the ship image and get its rectangle
         self.image = pygame.image.load("Assets/Spaceship01.png")
+        scale_size *= self.screen_rect.height
         self.image = pygame.transform.scale(self.image, (scale_size, scale_size))
         self.rect = self.image.get_rect()
 
